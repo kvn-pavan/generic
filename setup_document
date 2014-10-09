@@ -1,0 +1,84 @@
+				Phase 1 : Downloading the prerequisites
+				---------------------------------------
+
+Step 1
+
+1. Install MySQL and make sure it is running
+	http://dev.mysql.com/downloads/
+
+
+Step 2
+
+1. Download and extract JDK 1.7
+	http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
+
+
+Step 3
+
+1. Download and extract Apache Tomcat 7.0.53 (We need to import the libraries later, so remember the installation directory)
+	http://tomcat.apache.org/download-70.cgi
+
+2. Check status of tomcat 7 service
+	$sudo service tomcat7 status
+
+3. In case it is running, stop it
+	$sudo service tomcat7 stop
+
+
+Step 4
+
+1. Download and extract Eclipse IDE for Java EE Developers
+	http://www.eclipse.org/downloads/packages/eclipse-ide-java-ee-developers/keplersr2
+
+
+Step 5
+
+1. Download the repository from github.com
+	$git clone git@github.com:ailgeek/generic_spring.git
+
+2. Go to the downloaded directory and set branch to local
+	$git checkout local
+
+
+				Phase 2 : Setting up the Database
+				---------------------------------
+
+1. Log in from the root user and create a new user with name => presto and pass => pr3st0
+
+2. Export backup copies of mydb and mydb2 from dev database
+	http://cms.creyate.biz/phpmyadmin/
+
+3. Create new databases with names mydb and mydb2 using the presto user
+
+4. Import the tables from the backup copies to the new databases
+
+
+				Phase 3 : Setting up the project
+				--------------------------------
+
+1. Open eclipse
+
+2. Create a new Java project and set the working directory to be the same as the cloned repository directory
+
+3.	(i).   Browse to generic_spring/src/resources and open application.local.properties and copy the whole contents
+
+	(ii).  Create a new file named application.properties in generic_spring/src/resources and paste the data
+
+	(iii). Change the upload.directory line in application.properties to a suitable directory and save
+
+4. In the project explorer, right click the generic_spring project and select properties
+
+5. Go to the project facets tab, and click on convert to faceted form
+
+6. Make sure that dynamic web module 3.0, Java 1.7 and Javascript 1.0 are enabled
+
+7. Go to Java build path tab, and select libraries from the pane on the right
+
+8. Click on import external JARs and browse to the apache tomcat 7 installation directory, and import all the libraries in the lib folder
+
+9. Refresh the project
+
+10. Click on servers, right click on apache tomcat server and click start
+
+11. To test whether the server is running, go to a link (the following link returns a page which says OK)
+	http://localhost:8080/generic_spring/health

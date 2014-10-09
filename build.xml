@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="generic_spring" default="war" basedir=".">
+	<property file="build.properties" />
+	
+	<property name="war-file-name" value="${project-name}.war" />
+	<property name="source-directory" value="src" />
+	<!-- <property name="classes-directory" value="WebContent/WEB-INF/classes" /> -->
+	<property name="classes-directory" value="build/classes" />
+	<property name="web-directory" value="WebContent" />
+	<property name="lib-directory" value="WebContent/WEB-INF/lib" />
+	<property name="web-xml-file" value="WebContent/WEB-INF/web.xml" />
+	<tstamp prefix="build-info">
+		<format property="current-date" pattern="d-MMMM-yyyy" locale="en" />
+		<format property="current-time" pattern="hh:mm:ss a z" locale="en" />
+		<format property="year-month-day" pattern="yyyy-MM-dd" locale="en" />
+	</tstamp>
+	<!-- <property name="build-directory" value="build" /> -->
+
+	<!-- <property name="ftp-remotedir" value="uploaded-wars/${project-name}/${build-info.year-month-day}" /> -->
+
+	<path id="catalina-ant-classpath"> 
+		<fileset dir="${appserver.home}/lib"> 
+			<include name="catalina-ant.jar"/> 
+	        <include name="tomcat-coyote.jar"/>
+	        <include name="tomcat-util.jar"/>
+			
+		</fileset> 
+		<fileset dir="${appserver.home}/bin">
+		     <include name="tomcat-juli.jar"/>
+		</fileset>
+	</path> 
+	
+	<path id="classpath">
+	 	<fileset dir="${lib-directory}" includes="**/*.jar"/>
+		<fileset dir="${appserver.home}/lib"> 
+					<include name="catalina-ant.jar"/> 
+			        <include name="tomcat-coyote.jar"/>
+			        <include name="tomcat-util.jar"/>
+			<include name="**/*.jar"/>
+		</fileset> 
+	</path>
+	
+	<taskdef name="start" classname="org.apache.catalina.ant.StartTask"> 
+		<classpath refid="catalina-ant-classpath"/> 
+	</taskdef>
+
+	<taskdef name="stop" classname="org.apache.catalina.ant.StopTask">
+		<classpath refid="catalina-ant-classpath"/>
+	</taskdef>
+	
+	<target name="stop" description="stop application in tomcat">
+		<stop url="${tomcat-manager-url}" username="${tomcat-manager-username}"
+			password="${tomcat-manager-password}" path="/${project-name}" />
+	</target>
+
+	<target name="start" description="start application in tomcat">
+		<start url="${tomcat-manager-url}" username="${tomcat-manager-username}"
+			password="${tomcat-manager-password}" path="/${project-name}" />
+	</target>
+	
+	<target name="init">
+		<mkdir dir="${classes-directory}" />	
+	</target>
+	
+	<target name="compile" depends="init">
+		<echo>Compile the source files</echo>
+		<javac srcdir="${source-directory}" destdir="${classes-directory}" classpath="${lib-directory}">
+			<classpath refid="classpath"/>
+		</javac>
+	</target>
+	
+	<target name="war" depends="compile">
+		<!-- <mkdir dir="${build-directory}" /> -->
+		<delete file="${deploy.path}/${war-file-name}" />
+		
+		<copy tofile="${source-directory}/resources/application.properties" file="${source-directory}/resources/application.${env}.properties" verbose="true" overwrite="true" failonerror="true" >
+		</copy>
+		<mkdir dir="${classes-directory}/resources"/>
+		<copy todir="${classes-directory}/resources" file="${source-directory}/resources/application.properties" verbose="true" overwrite="true" failonerror="true" >
+		</copy>
+		<war warfile="${deploy.path}/${war-file-name}" webxml="${web-xml-file}">
+			<classes dir="${classes-directory}" />
+			<fileset dir="${web-directory}">
+				<!-- Need to exclude it since webxml is an attribute of the war tag above -->
+				<exclude name="WEB-INF/web.xml" />
+			</fileset>
+			<manifest>
+				<attribute name="Built-By" value="${builder}" />
+				<attribute name="Built-On" value="${build-info.current-date}" />
+				<attribute name="Built-At" value="${build-info.current-time}" />
+			</manifest>
+		</war>
+	</target>
+	
+	<target name="build-and-deploy" depends="stop,war,start" />
+	<target name="no-stop-build-and-deploy" depends="war,start" />
+	<!-- <target name="ftp" depends="" description="upload war file to server">
+		<ftp 
+			server="${ftp-server}" remotedir="${ftp-remotedir}"
+			userid="${ftp-userid}" password="${ftp-password}"
+			action="mkdir" verbose="yes">
+		</ftp>
+		<ftp 
+			server="${ftp-server}" remotedir="${ftp-remotedir}"
+			userid="${ftp-userid}" password="${ftp-password}"
+			action="send" verbose="yes" depends="yes">
+			<fileset file="${build-directory}/${war-file-name}" />
+		</ftp>
+	</target> -->
+
+	<!-- <target name="mail-upload-complete">
+		<mail from="pavan@arvindinternet.com"
+		      tolist="pavan@arvindinternet.com,indupriya@arvindinternet.com"
+		      subject="${war-file-name} was uploaded to the server"
+		      message="The ${war-file-name} file was uploaded to ${ftp-server} in ${ftp-remotedir}"/>
+	</target> -->
+
+	<!-- <target name="build-and-ftp" depends="war,ftp" /> -->
+	
+</project>
